@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useOktaAuth } from "@okta/okta-react";
+import { useEffect, useState } from 'react';
+import { useOktaAuth } from '@okta/okta-react';
 
 export const useAuth = () => {
   const { oktaAuth, authState } = useOktaAuth();
@@ -7,7 +7,7 @@ export const useAuth = () => {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    if (authState.isAuthenticated) {
+    if (authState?.isAuthenticated) {
       if (!user) {
         oktaAuth.getUser().then(setUser);
       }
@@ -16,7 +16,8 @@ export const useAuth = () => {
       setUser(null);
       setToken(null);
     }
-  }, [authState.isAuthenticated, authState, user, oktaAuth]);
+  }, [authState, user, oktaAuth]);
 
   return [user, token];
 };
+

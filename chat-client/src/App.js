@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
+import React, { useEffect, useState } from 'react';
+import io from 'socket.io-client';
 import Messages from './Messages';
 import MessageInput from './MessageInput';
 import { useOktaAuth } from '@okta/okta-react';
@@ -14,6 +14,7 @@ function App() {
   const logout = async () => oktaAuth.signOut('/');
 
   const [user, token] = useAuth();
+
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
@@ -22,25 +23,25 @@ function App() {
     return () => newSocket.close();
   }, [setSocket, token]);
 
+
   return (
     <div className="App">
-        <header className="app-header">
-        { authState.isPending ? (
-            <div>Loading...</div>
-        ) : (user ? (
+      <header className="app-header">
+      { !authState? (
+          <div>Loading...</div>
+      ) : (user ? (
           <div>
             <div>Signed in as {user.name}</div>
             <button onClick={logout}>Sign out</button>
           </div>
-        ) : (
+      ) : (
           <div>
             <div>Not signed in</div>
             <button onClick={login}>Sign in</button>
           </div>
-        )
+      )
       )}
       </header>
-
       { socket ? (
         <div className="chat-container">
           <Messages socket={socket} />
