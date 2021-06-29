@@ -112,4 +112,4 @@ Please post any questions as comments on the [blog post][blog], or visit our [Ok
 
 Apache 2.0, see [LICENSE](LICENSE).
 
-[blog]: https://developer.okta.com/blog/2021/07/19/socket-io-react
+[blog]: https://developer.okta.com/blog/2021/07/19/socket-io-react-tutorial
