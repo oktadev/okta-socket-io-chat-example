@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import "./MessageInput.css";
+import React, { useState } from 'react';
+import './MessageInput.css';
 
 const NewMessage = ({socket}) => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const submitForm = (e) => {
     e.preventDefault();
-    socket.emit("message", value);
-    setValue("");
+    socket.emit('message', value);
+    setValue('');
   };
 
   return (
@@ -24,3 +24,4 @@ const NewMessage = ({socket}) => {
 };
 
 export default NewMessage;
+

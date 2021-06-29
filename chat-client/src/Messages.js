@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import "./Messages.css";
+import React, { useEffect, useState } from 'react';
+import './Messages.css';
 
 function Messages({ socket }) {
   const [messages, setMessages] = useState({});
@@ -21,13 +21,13 @@ function Messages({ socket }) {
       });
     };
   
-    socket.on("message", messageListener);
-    socket.on("deleteMessage", deleteMessageListener);
-    socket.emit("getMessages");
+    socket.on('message', messageListener);
+    socket.on('deleteMessage', deleteMessageListener);
+    socket.emit('getMessages');
 
     return () => {
-      socket.off("message", messageListener);
-      socket.off("deleteMessage", deleteMessageListener);
+      socket.off('message', messageListener);
+      socket.off('deleteMessage', deleteMessageListener);
     };
   }, [socket]);
 
@@ -49,6 +49,7 @@ function Messages({ socket }) {
       }
     </div>
   );
-};
+}
 
 export default Messages;
+
