@@ -1,0 +1,211 @@
+:experimental:
+:commandkey: &#8984;
+:toc: macro
+
+= Secure Chat with Socket.IO and React Demo Steps
+
+This tutorial will show you how to create a simple chat application using Socket.IO, React for the front-end, and Node/Express for the back-end.
+
+**Prerequisites:**
+
+- https://nodejs.org/[Node 14]
+- An https://developer.okta.com[Okta Developer] Account (or the https://cli.okta.com/[Okta CLI])
+
+TIP: The brackets at the end of some steps indicate the IntelliJ Live Templates to use. You can find the template definitions at https://github.com/mraible/idea-live-templates[mraible/idea-live-templates]. You can also find the source code in the blog post and GitHub repo.
+
+toc::[]
+
+== Create a Chat Server with Express and Socket.IO
+
+. First, implement the server by using the following command to create a chat server project
+
+  npx express-generator --no-view chat-server
+
+. Navigate into the `chat-server` folder and install the Socket.IO and other dependencies
+
+  npm install
+  npm install -E socket.io@4.4.0 uuid@8.3.2 cors@2.8.5
+
+. Create `chat-server/chat.js` to configure the chat server [`chat-server`]
+
+. To use the `chat` module, open `bin/www` and add the following two imports at the top
++
+[source,javascript]
+----
+var chat = require('../chat');
+var socketio = require('socket.io');
+----
+
+. Modify the section under the comment `Create HTTP Server` to look like the code below
++
+[source,javascript]
+----
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+var io = socketio(server,{
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+chat(io);
+----
+
+. Finally, you need to add CORS support to the Express server. Open `app.js` and add the `cors` import to the top of the file.
++
+[source,javascript]
+----
+var cors = require('cors');
+----
++
+Then, add the `cors` middleware to the Express server
++
+[source,javascript]
+----
+var app = express();
+app.use(cors()); // add this line
+----
+
+. Start the server
+
+  npm start
+
+== Implement a Socket.IO Client Using React
+
+. Use Create React App to create a new React application
+
+  npx create-react-app chat-client
++
+CAUTION: If you get an error about `create-react-app` 4.0.3, run `npx clear-npx-cache`
+
+. Navigate into the `chat-client` folder and install the Socket.IO client library
+
+  npm install -E socket.io-client@4.4.0
+
+. Open `src/App.js` and configure a connection to the server using Socket.IO [`chat-app`]
+
+. Give the component some styling in `src/App.css` [`chat-app-css`]
+
+. Create `src/Messages.js` to display messages sorted by the timestamp at which they were created [`chat-messages`]
+
+. Add some styling in `src/Messages.css` [`chat-messages-css`]
+
+. Create `src/MessageInput.js` to host a text input you can use to send messages [`chat-input`]
+
+. Add CSS styling by creating a new `src/MessageInput.css` file [`chat-input-css`]
+
+. Your client is now complete! However, both the server and the client use port 3000 by default. To change the port for the client, create a `.env` file in your client project folder and copy the following line into it.
+
+  PORT=8080
+
+. Now you can start the client
+
+  npm start
+
+All messages will appear to be written by Anonymous and not by the current user. You can add identity with Okta to fix this.
+
+== Add User Authentication with OpenID Connect
+
+. Install the https://cli.okta.com/[Okta CLI] and run `okta register` to sign up for a new account. If you already have an account, run `okta login`.
+
+. Run `okta apps create`. Select the default app name, or change it as you see fit. Choose *Single-Page App* and press *Enter*.
+
+. Use `\http://localhost:8080/login/callback` for the Redirect URI and set the Logout Redirect URI to `\http://localhost:8080`.
+
+. You will also need to generate a token so that your chat server can communicate with the Okta authentication service. Run `okta login`, open the resulting URL in your browser, sign-in, and navigate to *Security* > *API*.
++
+Navigate to *Tokens* > *Create Token* and type in a name for the token. Copy the token to a secure place; you will need it later.
+
+=== Add Okta to the Socket.IO Chat Server
+
+. The next step is to add Okta to the server of the chat application. Install Okta's JWT Verifier and Node SDK in the `chat-server` project.
+
+  npm install -E @okta/jwt-verifier@2.3.0 @okta/okta-sdk-nodejs@6.1.0
+
+. Open `chat.js` and add an `authHandler()` just after the imports [`chat-auth-server`]
+
+. To use the authentication handler, tell Socket.IO to use it whenever a connection from the client is requested.
++
+[source,javascript]
+----
+function chat(io) {
+  io.use(authHandler);
+  ..
+}
+----
+
+. Start the server
+
+  npm start
+
+Now that you have added Okta to the server, add it to the client as well.
+
+=== Add Okta to the Socket.IO Client
+
+. Install Okta's React SDK and React Router in the `chat-client` project
+
+  npm install -E @okta/okta-react@6.3.0 @okta/okta-auth-js@5.9.1 \
+    react-dom@17.0.2 react-router-dom@5.3.0
+
+. Since the app is already configured to use a `.env` file, add your Okta settings
+
+  REACT_APP_OKTA_ORG_URL=https://{yourOktaDomain}
+  REACT_APP_OKTA_CLIENT_ID={yourClientID}
++
+Any definitions starting with `REACT_APP_` will become available in the client code through the `process.env` global
+
+. Open `src/index.js` and add Okta configuration and routes [`chat-auth-react`]
+
+. Next, update `ReactDOM.render()` to use secure routes
++
+[source,jsx]
+----
+ReactDOM.render(
+  <React.StrictMode>
+    <Router>
+      <SecuredRoutes />
+    </Router>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+----
+
+. Then, create a `src/auth.js` file to setup authentication and its state [`chat-auth-client`]
+
+. The function `useAuth()` will be used as a React hook in the main application component to set the user information and the JWT token value. Open `App.js` and import the handler at the top of the file.
++
+[source,javascript]
+----
+import { useOktaAuth } from '@okta/okta-react';
+import { useAuth } from './auth';
+----
+
+. At the start of the `App()` function, set the user information and token [`chat-auth-hook`]
+
+. Now, modify the `useEffect()` hook to send the token when connecting to the server
++
+[source,javascript]
+----
+useEffect(() => {
+    const newSocket = io(`...`, token && { query: { token } });
+    ...
+  }, [setSocket, token]);
+----
+
+. Finally, replace the `<header>` with code the renders the appropriate buttons based on the user's authentication state [`chat-auth-header`]
+
+. Start the client to see it all working! You can create another user in Okta (*Directory* > *People*) to simulate a chat between multiple people.
+
+  npm start
+
+🎉 Congratulations, you created a simple real-time chat application!
+
+== Dig deeper into WebSockets and JavaScript!
+
+⚡️ Find the code on GitHub: https://github.com/oktadev/okta-socket-io-chat-example[@oktadev/okta-socket-io-chat-example]
+
+📗 Read the blog post: https://developer.okta.com/blog/2021/07/14/socket-io-react-tutorial[Create a Secure Chat Application with Socket.IO and React]
+
