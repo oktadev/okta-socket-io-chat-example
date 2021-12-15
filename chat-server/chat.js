@@ -100,4 +100,3 @@ function chat(io) {
 }
 
 module.exports = chat;
-
