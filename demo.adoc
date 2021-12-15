@@ -24,7 +24,7 @@ toc::[]
 . Navigate into the `chat-server` folder and install the Socket.IO and other dependencies
 
   npm install
-  npm install -E socket.io@4.1.2 uuid@8.3.2 cors@2.8.5
+  npm install -E @socket.io4.4.0 uuid@8.3.2 cors@2.8.5
 
 . Create `chat-server/chat.js` to configure the chat server [`chat-server`]
 
