@@ -3,7 +3,7 @@ const OktaJwtVerifier = require('@okta/jwt-verifier');
 const okta = require('@okta/okta-sdk-nodejs');
 
 const jwtVerifier = new OktaJwtVerifier({
-  clientId: '{yourClientID',
+  clientId: '{yourClientID}',
   issuer: 'https://{yourOktaDomain}/oauth2/default',
 });
 
@@ -60,7 +60,7 @@ class Connection {
   }
 
   sendMessage(message) {
-      this.io.sockets.emit('message', message);
+    this.io.sockets.emit('message', message);
   }
 
   getMessages() {
@@ -100,4 +100,3 @@ function chat(io) {
 }
 
 module.exports = chat;
-
